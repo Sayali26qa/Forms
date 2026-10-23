@@ -1,94 +1,130 @@
 <!DOCTYPE html>
 <html lang="english">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Consent Widget</title>
-  <link rel="stylesheet" href="styles.css" />
-</head>
-<body>
-  <div class="widget-container">
-   	<div class="header-language-wrapper-container ">
-		<div id="language-wrapper" style="display: none;">
-		    <div class="dropdown">
-			<label for="langSelect">Language Preference <br></label>
-			<select id="langSelect"></select>
-			</div>
-		</div>  
-	</div>
-    <div class="header-container">
-      <div class="logo-area" id="logo-area"></div>
-    </div>
-    	<div class ="preview-statements">
-        <div id="consent-root">Loading consent form...</div>
-        <div id="error-message" class="error-message"></div>
-        <div id="toast"></div>
-      </div> 
-      <div class="full-width-footer-border"></div>
-      <div class="button-group" id="button-group">
-          <button class="cancel" id="cancelBtn" style="display: none;">Cancel</button>
-          <button class="submit" id="submitBtn" style="display: none;">Submit</button>
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0"
+    />
+    <title>Consent Widget</title>
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css" />
+
+  </head>
+  <body>
+    <div class="widget-container">
+      <div class="header-language-wrapper-container">
+        <div id="language-wrapper" class="d-none">
+          <div class="dropdown">
+            <label for="langSelect">
+              Language Preference <br />
+            </label>
+            <select id="langSelect"></select>
+          </div>
+        </div>
       </div>
-    
-  </div>
-  <script>
-    // Configuration options for the consent widget
-    window.consentWidgetConfig = {
-      consentFormId: "a247f634-c1fa-447a-a671-c9cce5d47d0b",
-      apiDomain: "https://l8skee.pre-dataprivacy.com",
-      apiUrl: "https://l8skee.pre-dataprivacy.com/cpm-api/open-api/v1/consent/v1/getConsentFormById",
-      submitApiUrl: "https://l8skee.pre-dataprivacy.com/cpm-api/open-api/v1/consent/v1/createOrUpdateConsent",
-      tenantToken: "Bearer bearer",
-      signatureServiceUrl: "https://l8skee.pre-dataprivacy.com/cpm-sign",
-      dataPrincipalId: [
-        {
-          key: "email",
-          value: "email"
-        }
-      ],
-      customAttributes: {},
-      showButtons: true,
-      showLanguageDropdown: true,
-      enableCheckboxes: true,
-      enableRadioButtons: true,
-      enableDropdowns: true,
-      receivedType:"WEB",
-      customHeaders: {
+      <div id="pc-tabs" class="pc-tabs d-none">
+        <div class="pc-tab-group">
+          <div id="tab-current" class="pc-tab active">
+            Current Preference
+          </div>
+          <div id="tab-history" class="pc-tab">
+            Preference History
+          </div>
+        </div>
+      <div id="downloadHistoryBtn" class="download-history-link hidden">
+      <i class="ri-download-2-line"></i> Download Current Preference
+      </div>
+      </div>
+
+      <div class="header-container">
+
+        <div id="logo-area" class="logo-area">
+        </div>
+      </div>
+
+      <div class="preview-statements">
+        <div id="consent-root">Loading...</div>
+
+        <div id="historyTab" class="hidden">
+          <div
+            id="historyContainer"
+            class="history-scroll"
+          ></div>
+        </div>
+
+        <div id="toast"></div>
+      </div>
+
+      <div class="full-width-footer-border" id="full-width-footer-border"></div>
+
+      <div
+        id="error-message"
+        class="error-message form-error"
+      ></div>
+
+      <div class="button-group" id="button-group">
+        <button class="cancel d-none" id="cancelBtn">
+          Cancel
+        </button>
+        <button class="submit d-none" id="submitBtn">
+          Submit
+        </button>
+      </div>
+    </div>
+
+<script>
+  window.consentWidgetConfig = {
+    preferenceFormId: "6e3748e3-d374-4d82-80d4-9f6a7f284a5c",
+    preferenceFormName: "seqrite",
+    apiDomain: "https://l8skee.pre-dataprivacy.com",
+    preferenceDetailsApiUrl:"https://l8skee.pre-dataprivacy.com/cpm-api/open-api/v1/preference/v1/export/getPreferenceDetails",
+    preferenceHistoryApiUrl:"https://l8skee.pre-dataprivacy.com/cpm-api/open-api/v1/preference/v1/export/auditSearch/scroll",
+    downloadHistoryPdfApiUrl:"https://l8skee.pre-dataprivacy.com/cpm-api/open-api/v1/preference/v1/export/downloadPreferenceHistoryPdf",
+    submitApiUrl:"https://l8skee.pre-dataprivacy.com/cpm-api/open-api/v1/preference/v1/createOrUpdateConsent",
+    signatureServiceUrl: "https://l8skee.pre-dataprivacy.com/cpm-sign",
+    userToken: "Bearer bearer",
+    customAttributes: {},
+    showButtons: true,
+    showLanguageDropdown: true,
+    enableCheckboxes: true,
+    enableRadioButtons: true,
+    enableDropdowns: true,
+    footerAlignment: "left",
+    receivedType:"WEB",
+    customHeaders: {
         "test-header-1": "test-1",
         "test-header-2": "test-2"
-      }
-    };
+    }
+  };
 
-  // Function for Android WebView integration to dynamically set tenant token and data principal ID
+  // Function for Android WebView integration to dynamically set user 
   // Called from Android native code before loading the consent widget
-  window.updateConsentConfig = function(token, dataPrincipalId) {
-      if (token) {
-        window.consentWidgetConfig.tenantToken = token;
-      }
+  window.updateConsentConfig = function(token) {
+  if (token) {
+    window.consentWidgetConfig.userToken = token;
+  }
 
-      if (dataPrincipalId) {
-        window.consentWidgetConfig.dataPrincipalId = dataPrincipalId;
-      }
-
-      // Dynamically load script.js only once to prevent multiple script injections
-      if (!window.scriptLoaded) {
+  // Dynamically load script.js only once to prevent multiple script injections
+    if (!window.scriptLoaded) {
         const script = document.createElement('script');
         script.src = 'script.js';
         // SRI (Subresource Integrity) ensures script hasn't been tampered with
         // crossOrigin required for SRI validation
         script.crossOrigin = 'anonymous';
-        script.integrity = "sha384-+D19eOxe7ix4v061w3No5XYWlKH1wPy9/Bloc//dVxhdXSc+sQPeFGlMjdVQzQ9c";
+        script.integrity = "sha384-yqFLyD7c2/Ugtgc4Mmwk4EL9ug08Rb8t6SD6JB51GniLJu//++weJ3EPIm4YSVss";
         script.onload = function() {
           window.scriptLoaded = true;
         };
         document.body.appendChild(script);
       }
 
-      return "Config updated successfully";
-    };
-  </script>
-  
 
+  return "Config updated successfully";
+};
+  
+</script>
+  
 <!--
   Optional: Use custom buttons if the parent application
   wants to control Consent Form submission and reset actions.
@@ -126,9 +162,11 @@
 
     window.consentWidget.reset();
   });
-</script>
 -->
+
+</script>
 <!--comment below line in case of Android integration -->
-<script src="script.js" integrity="sha384-+D19eOxe7ix4v061w3No5XYWlKH1wPy9/Bloc//dVxhdXSc+sQPeFGlMjdVQzQ9c" crossorigin="anonymous"></script>
-</body>
+<script src="script.js" integrity="sha384-yqFLyD7c2/Ugtgc4Mmwk4EL9ug08Rb8t6SD6JB51GniLJu//++weJ3EPIm4YSVss" crossorigin="anonymous"></script>
+  </body>
 </html>
+   
